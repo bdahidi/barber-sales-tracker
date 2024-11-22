@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barber Shop Sales Tracker</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     <style>
         :root {
@@ -50,12 +49,21 @@
             margin-bottom: 10px;
         }
 
-        .date-display {
+        .date-time-display {
             text-align: center;
-            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .date-display {
             font-size: 1.2rem;
             color: var(--text-color);
-            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .time-display {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            font-weight: bold;
         }
 
         .card {
@@ -114,16 +122,11 @@
             font-size: 16px;
             font-weight: 500;
             transition: all 0.3s ease;
-            width: 100%;
         }
 
         .btn:hover {
+            opacity: 0.9;
             transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn:active {
-            transform: translateY(0);
         }
 
         .dashboard-grid {
@@ -154,11 +157,6 @@
             align-items: center;
             padding: 12px;
             border-bottom: 1px solid #e5e7eb;
-            transition: background-color 0.3s ease;
-        }
-
-        .stat-item:hover {
-            background-color: #f8fafc;
         }
 
         .stat-item:last-child {
@@ -176,8 +174,6 @@
             border-radius: 8px;
             text-align: center;
             display: none;
-            font-weight: 500;
-            animation: fadeIn 0.3s ease;
         }
 
         .success {
@@ -205,11 +201,10 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 5px;
-            transition: all 0.3s ease;
         }
 
         .refresh-btn:hover {
@@ -217,13 +212,8 @@
         }
 
         .last-update {
-            font-size: 14px;
+            font-size: 0.9rem;
             color: #6b7280;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 768px) {
@@ -243,28 +233,10 @@
                 grid-template-columns: 1fr;
             }
             
-            .card, .stat-card {
-                padding: 15px;
+            .form-control {
+                min-height: 48px;
+                font-size: 16px;
             }
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: var(--text-color);
-        }
-
-        .loading::after {
-            content: "...";
-            animation: dots 1.5s steps(5, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: "."; }
-            40% { content: ".."; }
-            60% { content: "..."; }
-            80%, 100% { content: ""; }
         }
     </style>
 </head>
@@ -272,7 +244,10 @@
     <div class="container">
         <div class="header">
             <h1>Barber Shop Sales Tracker</h1>
-            <div class="date-display" id="currentDate"></div>
+            <div class="date-time-display">
+                <div class="date-display" id="currentDate"></div>
+                <div class="time-display" id="currentTime"></div>
+            </div>
         </div>
 
         <!-- Sales Entry Form -->
@@ -283,8 +258,7 @@
                     <div class="form-group">
                         <label for="employee">Employee</label>
                         <select id="employee" class="form-control" required>
-                            <option value="">Select Employee</option>
-                            <option value="Yassine">Yassine</option>
+                            <option value="Yassine" selected>Yassine</option>
                             <option value="Ferjani">Ferjani</option>
                             <option value="Riziki">Riziki</option>
                             <option value="Chamin">Chamin</option>
@@ -317,8 +291,6 @@
             </button>
             <span class="last-update" id="lastUpdate"></span>
         </div>
-
-        <div id="loading" class="loading">Updating dashboard</div>
 
         <!-- Dashboard -->
         <div class="dashboard-grid">
@@ -359,17 +331,30 @@
             }).format(amount);
         };
 
-        // Update current date display
+        // Update time display
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            };
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleTimeString('en-US', timeOptions);
+        }
+
+        // Update date display
         function updateDateDisplay() {
             const now = new Date();
-            const options = { 
+            const dateOptions = { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
             };
             document.getElementById('currentDate').textContent = 
-                now.toLocaleDateString('en-US', options);
+                now.toLocaleDateString('en-US', dateOptions);
         }
 
         // Show message
@@ -388,11 +373,6 @@
             const now = new Date();
             document.getElementById('lastUpdate').textContent = 
                 `Last updated: ${now.toLocaleTimeString()}`;
-        }
-
-        // Show/hide loading
-        function toggleLoading(show) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
 
         // Update dashboard
@@ -420,7 +400,6 @@
 
         // Fetch daily data
         async function fetchDailyData() {
-            toggleLoading(true);
             try {
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
@@ -428,8 +407,6 @@
             } catch (error) {
                 console.error('Error fetching data:', error);
                 showMessage('Error updating dashboard', 'error');
-            } finally {
-                toggleLoading(false);
             }
         }
 
@@ -456,6 +433,8 @@
 
                 showMessage('Sale recorded successfully', 'success');
                 e.target.reset();
+                // Reset employee to Yassine after form reset
+                document.getElementById('employee').value = 'Yassine';
                 // Wait a bit before fetching updated data
                 setTimeout(fetchDailyData, 1000);
             } catch (error) {
@@ -465,11 +444,21 @@
         });
 
         // Initialize
-        updateDateDisplay();
-        fetchDailyData();
-        
-        // Refresh every 5 minutes
-        setInterval(fetchDailyData, 300000);
+        function initialize() {
+            updateDateDisplay();
+            updateTimeDisplay();
+            fetchDailyData();
+            
+            // Update time every second
+            setInterval(updateTimeDisplay, 1000);
+            // Update date every minute
+            setInterval(updateDateDisplay, 60000);
+            // Refresh data every 5 minutes
+            setInterval(fetchDailyData, 300000);
+        }
+
+        // Start the application
+        initialize();
     </script>
 </body>
 </html>
