@@ -470,3 +470,36 @@
                     showMessage('Sale recorded successfully', 'success');
                     e.target.reset();
                     document.getElementById('employee').value = '
+document.getElementById('employee').value = 'Yassine';
+                    setTimeout(fetchDailyData, 2000);
+                } else {
+                    showMessage('Error recording sale', 'error');
+                }
+                document.getElementById('loading').style.display = 'none';
+            };
+
+            xhr.onerror = function() {
+                showMessage('Error submitting sale', 'error');
+                document.getElementById('loading').style.display = 'none';
+            };
+
+            xhr.send(JSON.stringify(formData));
+        });
+
+        // Initialize
+        function initialize() {
+            updateDateDisplay();
+            updateTimeDisplay();
+            fetchDailyData();
+            
+            // Update displays
+            setInterval(updateTimeDisplay, 1000);
+            setInterval(updateDateDisplay, 60000);
+            setInterval(fetchDailyData, 300000);
+        }
+
+        // Start the application
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>
