@@ -353,37 +353,31 @@
         // Replace with your Google Apps Script Web App URL
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztZnWrboyIHRdcixQDVg4zFb8iQSYsbdbgEjc0SNzZ1OA8ljdCL7WENvgv7yQ3BqnZ/exec';
         
-        // Format currency
-        const formatCurrency = (amount) => {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            }).format(amount || 0);
-        };
+/ Format currency
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(Number(amount) || 0);
+};
 
-        // Show message
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 3000);
-        }
+// Show message
+function showMessage(text, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${type}`;
+    messageDiv.style.display = 'block';
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 3000);
+}
 
-        // Update time display
-        function updateTimeDisplay() {
-            const now = new Date();
-            const timeOptions = { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit',
-                hour12: true 
-            };
-            document.getElementById('currentTime').textContent = 
-                now.toLocaleTimeString('en-US', timeOptions);
-        }
+// Update last update time
+function updateLastUpdateTime() {
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent = 
+        `Last updated: ${now.toLocaleTimeString()}`;
+}
 
         // Update date display
         function updateDateDisplay() {
@@ -468,58 +462,144 @@
             }
         }
 
-        // Handle form submission
-        document.getElementById('salesForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = {
-                employee: document.getElementById('employee').value,
-                amount: document.getElementById('amount').value,
-                paymentType: document.getElementById('paymentType').value,
-                date: new Date().toISOString()
-            };
 
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', SCRIPT_URL, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
+    // Keep your existing script code, but replace the form submission handler with this:
 
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    showMessage('Sale recorded successfully', 'success');
-                    e.target.reset();
-                    document.getElementById('employee').value = 'Yassine';
-                    
-                    // Wait 2 seconds then fetch updated data
-                    setTimeout(fetchDailyData, 2000);
-                } else {
-                    showMessage('Error recording sale', 'error');
-                }
-            };
+    // Handle form submission
+    document.getElementById('salesForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitButton = document.querySelector('button[type="submit"]');
+        submitButton.disabled = true; // Disable button during submission
+        
+        const formData = {
+            employee: document.getElementById('employee').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            paymentType: document.getElementById('paymentType').value,
+            date: new Date().toISOString()
+        };
 
-            xhr.onerror = function() {
-                showMessage('Error submitting sale', 'error');
-            };
+        // Show loading
+        const loadingDiv = document.getElementById('loading');
+        loadingDiv.style.display = 'block';
 
-            xhr.send(JSON.stringify(formData));
-        });
+        // Log the data being sent
+        console.log('Sending data:', formData);
+        console.log('To URL:', SCRIPT_URL);
 
-        // Initialize
-        function initialize() {
-            updateDateDisplay();
-            updateTimeDisplay();
-            fetchDailyData();
-            
-            // Update displays
-            setInterval(updateTimeDisplay, 1000);
-            setInterval(updateDateDisplay, 60000);
-            setInterval(fetchDailyData, 300000);
+        // Use XMLHttpRequest for the submission
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', SCRIPT_URL, true);
+        
+        xhr.onload = function() {
+            // Re-enable submit button
+            submitButton.disabled = false;
+            loadingDiv.style.display = 'none';
+
+            if (xhr.status === 200) {
+                console.log('Success response:', xhr.responseText);
+                showMessage('Sale recorded successfully', 'success');
+                
+                // Reset form
+                e.target.reset();
+                document.getElementById('employee').value = 'Yassine';
+                
+                // Fetch updated data after a short delay
+                setTimeout(function() {
+                    fetchDailyData();
+                }, 1000);
+            } else {
+                console.error('Error response:', xhr.responseText);
+                showMessage('Error submitting sale. Please try again.', 'error');
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error('Network error occurred');
+            submitButton.disabled = false;
+            loadingDiv.style.display = 'none';
+            showMessage('Network error. Please check your connection.', 'error');
+        };
+
+        // Send the request
+        try {
+            xhr.send(JSON.stringify({
+                employee: formData.employee,
+                amount: formData.amount,
+                paymentType: formData.paymentType,
+                date: formData.date
+            }));
+        } catch (error) {
+            console.error('Error sending request:', error);
+            submitButton.disabled = false;
+            loadingDiv.style.display = 'none';
+            showMessage('Error sending request. Please try again.', 'error');
         }
+    });
 
-        // Start the application
-        document.addEventListener('DOMContentLoaded', initialize);
+    // Add or update these helper functions
+    function fetchDailyData() {
+        const loadingDiv = document.getElementById('loading');
+        loadingDiv.style.display = 'block';
 
-        // Refresh button handler
-        document.querySelector('.refresh-btn').addEventListener('click', fetchDailyData);
-    </script>
+        const xhr = new XMLHttpRequest();
+        const timestamp = new Date().getTime();
+        xhr.open('GET', `${SCRIPT_URL}?t=${timestamp}`, true);
+
+        xhr.onload = function() {
+            loadingDiv.style.display = 'none';
+            if (xhr.status === 200) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    console.log('Received data:', data);
+                    updateDashboard(data);
+                    updateLastUpdateTime();
+                } catch (error) {
+                    console.error('Error parsing data:', error);
+                    showMessage('Error updating dashboard', 'error');
+                }
+            } else {
+                console.error('Error fetching data:', xhr.status);
+                showMessage('Error fetching data', 'error');
+            }
+        };
+
+        xhr.onerror = function() {
+            loadingDiv.style.display = 'none';
+            console.error('Network error while fetching data');
+            showMessage('Network error. Please check your connection.', 'error');
+        };
+
+        xhr.send();
+    }
+
+    function updateDashboard(data) {
+        try {
+            // Update employee sales
+            const employeeSalesDiv = document.getElementById('employeeSales');
+            employeeSalesDiv.innerHTML = '';
+
+            if (data.dailyTotals) {
+                Object.entries(data.dailyTotals).forEach(([employee, amount]) => {
+                    const div = document.createElement('div');
+                    div.className = 'stat-item';
+                    div.innerHTML = `
+                        <span>${employee}</span>
+                        <span class="stat-value">${formatCurrency(amount)}</span>
+                    `;
+                    employeeSalesDiv.appendChild(div);
+                });
+            }
+
+            // Update summary totals
+            document.getElementById('totalSales').textContent = formatCurrency(data.totalSales || 0);
+            document.getElementById('cashTotal').textContent = formatCurrency(data.totalCash || 0);
+            document.getElementById('cardTotal').textContent = formatCurrency(data.totalCard || 0);
+        } catch (error) {
+            console.error('Error updating dashboard:', error);
+            showMessage('Error updating display', 'error');
+        }
+    }
+
 </body>
 </html>
