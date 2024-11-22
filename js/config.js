@@ -1,7 +1,7 @@
 // Configuration
 const CONFIG = {
     // Replace with your Google Apps Script Web App URL
-    SCRIPT_URL: 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL',
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyheeAog83b5Hrg-rZEaIcRCk6VpinD5XYmCobx_dzDA4WEaJDnEvpEwYmDZ-0vXahcig/exec',
     
     // Refresh interval in milliseconds (5 minutes)
     REFRESH_INTERVAL: 300000,
