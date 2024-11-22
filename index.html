@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barber Shop Sales Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Barber Shop Sales Tracker</h1>
+        </header>
+
+        <!-- Sales Entry Form -->
+        <div class="card">
+            <h2>New Sale Entry</h2>
+            <form id="salesForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="employee">Employee</label>
+                        <select id="employee" class="form-control" required>
+                            <option value="">Select Employee</option>
+                            <option value="Yassine">Yassine</option>
+                            <option value="Ferjani">Ferjani</option>
+                            <option value="Riziki">Riziki</option>
+                            <option value="Chamin">Chamin</option>
+                            <option value="Ayoub">Ayoub</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" class="form-control" required step="0.01" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentType">Payment Type</label>
+                        <select id="paymentType" class="form-control">
+                            <option value="Cash">Cash</option>
+                            <option value="Bank Card">Bank Card</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Submit Sale</button>
+            </form>
+            <div id="message" class="message"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Employee Daily Sales</h2>
+                <div id="employeeSales"></div>
+            </div>
+
+            <div class="card">
+                <h2>Daily Summary</h2>
+                <div id="dailySummary">
+                    <div class="stat-item">
+                        <strong>Total Sales</strong>
+                        <span id="totalSales">$0.00</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Cash Payments</strong>
+                        <span id="cashTotal">$0.00</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Card Payments</strong>
+                        <span id="cardTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
