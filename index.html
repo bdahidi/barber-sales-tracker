@@ -1,131 +1,313 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { DollarSign, Users, CreditCard } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barber Shop Sales Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/google-apps-script/1.0.0/google-apps-script.js"></script>
+    <style>
+        :root {
+            --primary-color: #2d3748;
+            --secondary-color: #4a5568;
+            --accent-color: #3182ce;
+            --background-color: #f7fafc;
+            --success-color: #48bb78;
+        }
 
-const SalesTracker = () => {
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [formData, setFormData] = useState({
-    employee: 'Yassine',
-    amount: '',
-    paymentType: 'cash'
-  });
-  const [dailySummary, setDailySummary] = useState({
-    totalSales: 0,
-    totalCash: 0,
-    totalCard: 0,
-    employeeSales: {}
-  });
-  const [notification, setNotification] = useState('');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+        body {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+        }
 
-    return () => clearInterval(timer);
-  }, []);
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // In real implementation, this would call your Google Apps Script endpoint
-    setNotification('Sale recorded successfully!');
-    setTimeout(() => setNotification(''), 3000);
-  };
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
 
-  return (
-    <div className="max-w-4xl mx-auto p-4 space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Barber Shop Sales Tracker</span>
-            <span className="text-lg font-normal">
-              {currentTime.toLocaleTimeString()}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <select
-                className="w-full p-2 border rounded"
-                value={formData.employee}
-                onChange={(e) => setFormData({...formData, employee: e.target.value})}
-              >
-                <option value="Yassine">Yassine</option>
-                <option value="Employee2">Employee 2</option>
-                <option value="Employee3">Employee 3</option>
-              </select>
-              
-              <Input
-                type="number"
-                placeholder="Amount"
-                value={formData.amount}
-                onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                className="w-full"
-                step="0.01"
-                required
-              />
-              
-              <select
-                className="w-full p-2 border rounded"
-                value={formData.paymentType}
-                onChange={(e) => setFormData({...formData, paymentType: e.target.value})}
-              >
-                <option value="cash">Cash</option>
-                <option value="card">Card</option>
-              </select>
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .refresh-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background-color: #2c5282;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sales-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        .submit-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #38a169;
+        }
+
+        .summary-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--background-color);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .summary-item {
+            padding: 1rem;
+            background-color: var(--background-color);
+            border-radius: 0.375rem;
+        }
+
+        .summary-label {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+
+        .summary-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            background-color: var(--success-color);
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .show-notification {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <h1>Barber Shop Sales Tracker</h1>
+            <button class="refresh-btn" onclick="refreshSummary()">
+                Refresh Summary
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="sales-form">
+                <h2>New Sale Entry</h2>
+                <form id="salesForm" onsubmit="handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="employee">Employee</label>
+                        <select id="employee" required>
+                            <option value="">Select Employee</option>
+                            <option value="Yassine">Yassine</option>
+                            <option value="Ferjani">Ferjani</option>
+                            <option value="Riziki">Riziki</option>
+                            <option value="Chamin">Chamin</option>
+                            <option value="Ayoub">Ayoub</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Amount ($)</label>
+                        <input type="number" id="amount" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentType">Payment Type</label>
+                        <select id="paymentType" required>
+                            <option value="">Select Payment Type</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Add Sale</button>
+                </form>
             </div>
-            
-            <Button type="submit" className="w-full">
-              Record Sale
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              <DollarSign className="h-4 w-4" />
-              <h3 className="text-lg font-semibold">Total Sales</h3>
+            <div class="summary-section">
+                <div class="summary-header">
+                    <h2>Daily Summary</h2>
+                    <p id="lastUpdated">Last updated: --</p>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Total Sales</div>
+                        <div class="summary-value" id="totalSales">$0.00</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Cash Sales</div>
+                        <div class="summary-value" id="cashSales">$0.00</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Card Sales</div>
+                        <div class="summary-value" id="cardSales">$0.00</div>
+                    </div>
+                </div>
             </div>
-            <p className="text-2xl font-bold">${dailySummary.totalSales.toFixed(2)}</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              <CreditCard className="h-4 w-4" />
-              <h3 className="text-lg font-semibold">Card Sales</h3>
-            </div>
-            <p className="text-2xl font-bold">${dailySummary.totalCard.toFixed(2)}</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-2">
-              <Users className="h-4 w-4" />
-              <h3 className="text-lg font-semibold">Cash Sales</h3>
-            </div>
-            <p className="text-2xl font-bold">${dailySummary.totalCash.toFixed(2)}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {notification && (
-        <Alert>
-          <AlertDescription>{notification}</AlertDescription>
-        </Alert>
-      )}
+        </div>
     </div>
-  );
-};
 
-export default SalesTracker;
+    <div class="notification" id="notification">Sale added successfully!</div>
+
+    <script>
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshSummary();
+        });
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const saleData = {
+                employee: document.getElementById('employee').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                paymentType: document.getElementById('paymentType').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Call Google Apps Script function
+            google.script.run
+                .withSuccessHandler(onSaleSuccess)
+                .withFailureHandler(onSaleError)
+                .addSale(saleData);
+        }
+
+        function refreshSummary() {
+            google.script.run
+                .withSuccessHandler(updateSummary)
+                .withFailureHandler(console.error)
+                .getDailySummary();
+        }
+
+        function updateSummary(summary) {
+            document.getElementById('totalSales').textContent = formatCurrency(summary.totalSales);
+            document.getElementById('cashSales').textContent = formatCurrency(summary.cashTotal);
+            document.getElementById('cardSales').textContent = formatCurrency(summary.cardTotal);
+            document.getElementById('lastUpdated').textContent = `Last updated: ${summary.lastUpdated}`;
+        }
+
+        function onSaleSuccess() {
+            // Show notification
+            const notification = document.getElementById('notification');
+            notification.classList.add('show-notification');
+            
+            // Reset form
+            document.getElementById('salesForm').reset();
+            
+            // Refresh summary
+            refreshSummary();
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show-notification');
+            }, 3000);
+        }
+
+        function onSaleError(error) {
+            console.error('Error adding sale:', error);
+            alert('Error adding sale. Please try again.');
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+    </script>
+</body>
+</html>
